@@ -4,7 +4,7 @@ import StoreIp from "../models/storeIp.model";
 
 // 24 hours cooldown in milliseconds
 const MINING_COOLDOWN = 24 * 60 * 60 * 1000;
-const REWARD = Number(process.env.FixMiniingRate) ; // fixed reward from env, fallback 10
+const REWARD = Number(process.env.FixMiniingRate)||2 ; // fixed reward from env, fallback 10
 
 export const mineCoin = async (req: Request, res: Response): Promise<void> => {
   try {

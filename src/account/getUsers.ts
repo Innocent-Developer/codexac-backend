@@ -6,7 +6,9 @@ export const getUsers = async (req: Request, res: Response): Promise<void> => {
     const users = await User.find({}, { 
       _id: 0, 
       address: 1, 
-      totalCoins: 1 
+      totalCoins: 1 ,
+      ranks:1,
+      lastTransactionDate:1
     }).lean();
 
     res.status(200).json(users);
