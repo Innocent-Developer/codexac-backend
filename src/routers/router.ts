@@ -5,6 +5,9 @@ import { mineCoin } from "../mining-coin/coinMine";
 import { getUserByUid } from "../account/getUserbuUid";
 import { createStack } from "../stakeCoin/stakeCoins";
 import { getUsers } from "../account/getUsers";
+import { getAllTransactions } from "../transactions/getAlltransaction";
+import { getAllTransactionsByUser } from "../transactions/getAllTransactionByUser";
+import { getTransaction } from "../transactions/getTransaction";
 
 const router = Router();
 //auths
@@ -19,5 +22,10 @@ router.post("/mining/coin",mineCoin)
 
 //stack coin 
 router.post("/stack/coin",createStack);
+
+//transacrions
+router.get("/transactions",getAllTransactions);
+router.get("/transactions/ua/:userAddress",getAllTransactionsByUser);
+router.get("/transactions/txh/:transactionHash",getTransaction);
 
 export default router;
