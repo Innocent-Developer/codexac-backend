@@ -1,0 +1,105 @@
+Cryptocurrency Mining Application - Technical Overview
+
+Project Name: Crypto Mining Backend
+Version: 1.0.0
+Technology Stack: Node.js, TypeScript, Express, MongoDB
+
+DETAILED DESCRIPTION
+===================
+
+1. System Architecture
+---------------------
+- Backend API server built with Express.js
+- MongoDB database for data persistence
+- RESTful API architecture
+- Modular component structure
+- MVC design pattern implementation
+
+2. Core Functionality
+--------------------
+a) Mining System
+   - Daily mining rewards (10 coins)
+   - Automated reward distribution
+   - Cooldown period management
+   - Mining rate control
+
+b) Transaction System
+   - P2P transfers
+   - Transaction validation
+   - Hash generation
+   - Block number assignment
+   - Daily limits enforcement
+
+c) User Management
+   - Secure authentication
+   - Password encryption
+   - JWT token management
+   - Account recovery
+   - User profile management
+
+3. Security Implementation
+-------------------------
+- bcrypt password hashing
+- JWT-based authentication
+- Rate limiting
+- Input validation
+- Transaction verification
+- Protected routes
+- Environmental configuration
+
+4. Database Structure
+--------------------
+Collections:
+- Users
+- Transactions
+- Mining Records
+- Authentication Tokens
+
+5. API Structure
+---------------
+- RESTful endpoints
+- JSON response format
+- Status codes adherence
+- Error handling
+- Response validation
+
+6. Development Features
+----------------------
+- TypeScript type safety
+- Hot reloading
+- Environment configuration
+- Error logging
+- Testing framework
+- Build optimization
+
+7. Deployment Requirements
+-------------------------
+- Node.js v14+
+- MongoDB instance
+- Environment variables
+- SSL certificate (production)
+- PM2 process manager
+
+8. Scalability Considerations
+---------------------------
+- Database indexing
+- Connection pooling
+- Caching implementation
+- Rate limiting
+- Load balancing ready
+
+9. Monitoring & Maintenance
+--------------------------
+- Error logging
+- Performance metrics
+- Transaction monitoring
+- User activity tracking
+- System health checks
+
+10. Future Enhancements
+----------------------
+- WebSocket implementation
+- Enhanced security features
+- Additional mining algorithms
+- Advanced analytics
+- Mobile API endpoints
