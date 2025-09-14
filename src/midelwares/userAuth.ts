@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import {User} from '../models/user.model';
+import {User} from '../models/user.model'; // default import, not destructured
 
 interface AuthRequest extends Request {
-  user?: any;   // you can replace `any` with your User type/interface
+  user?: any;   // replace `any` with your IUser interface if you have it
   token?: string;
 }
 
@@ -18,7 +18,7 @@ const userAuth = async (req: AuthRequest, res: Response, next: NextFunction): Pr
     const token = authHeader.replace('Bearer ', '');
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload;
 
-    const user = await User.findOne({ _id: decoded.id, 'tokens.token': token });
+    const user = await User.findById(decoded.id); //  simplified query
     if (!user) {
       res.status(401).json({ error: 'Invalid user, please authenticate.' });
       return;
