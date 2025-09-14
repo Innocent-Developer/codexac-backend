@@ -173,7 +173,6 @@ npm run test:coverage
 
 **Abubakkar Sajid** is a Full Stack Web Developer from Lahore, Pakistan, with approximately 2 years of experience.  
 He works with technologies including TypeScript, JavaScript, React.js, Next.js, Node.js, Express.js, MongoDB, PHP, Python, and tools like Git, Docker, Figma, etc.  
-His work spans from portfolio sites and RESTful APIs to e-commerce apps and crypto-mining apps.  
 Contact info:  
 - Email: abubakkarsajid4@gmail.com  
 - Website: https://abubakkar.online
