@@ -18,7 +18,7 @@ const userAuth = async (req: AuthRequest, res: Response, next: NextFunction): Pr
     const token = authHeader.replace('Bearer ', '');
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload;
 
-    const user = await User.findOne({ _id: decoded._id, 'tokens.token': token });
+    const user = await User.findOne({ _id: decoded.id, 'tokens.token': token });
     if (!user) {
       res.status(401).json({ error: 'Invalid user, please authenticate.' });
       return;
