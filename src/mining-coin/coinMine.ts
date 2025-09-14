@@ -8,7 +8,7 @@ const REWARD = Number(process.env.FixMiniingRate)||2 ; // fixed reward from env,
 
 export const mineCoin = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { userId } = req.body;
+    const { userId,ipaddress } = req.body;
 
     if (!userId) {
       res.status(400).json({ message: "User ID is required" });
@@ -41,7 +41,7 @@ export const mineCoin = async (req: Request, res: Response): Promise<void> => {
     //  Add reward & update mining info
     user.totalCoins += REWARD;
     user.lastMiningTime = now;
-    user.lastIpAddress = req.ip || req.connection.remoteAddress || "unknown";
+    user.lastIpAddress = req.ip || ipaddress || "unknown";
 
     await user.save();
 
