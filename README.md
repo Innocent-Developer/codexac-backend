@@ -1,56 +1,70 @@
-# Cryptocurrency Mining Application Backend
+# Crypto Mining Backend Application
 
-## Overview
-A secure and scalable backend system for cryptocurrency mining and trading, built with TypeScript, Node.js, Express, and MongoDB.
+## 🚀 Project Overview
+A robust cryptocurrency mining and transaction management system built with TypeScript and Node.js.
 
-## 🚀 Key Features
+## 📁 Directory Structure
+```
+backend/
+├── src/
+│   ├── account/
+│   │   ├── login.ts         # User authentication
+│   │   ├── passwordReset.ts # Password recovery
+│   │   └── signup.ts        # User registration
+│   ├── coinTransfer/
+│   │   └── sendCoin.ts      # Coin transfer logic
+│   ├── db/
+│   │   └── dbconnect.ts     # MongoDB connection
+│   ├── leaderboard/
+│   │   └── leaderboard.ts   # Mining rankings
+│   ├── mining-coin/
+│   │   └── coinMine.ts      # Mining operations
+│   ├── models/
+│   │   ├── transaction.hash.ts  # Transaction schema
+│   │   └── user.model.ts        # User schema
+│   ├── routers/
+│   │   └── router.ts        # API routes
+│   ├── transactions/
+│   │   ├── getAlltransaction.ts
+│   │   ├── getAllTransactionByUser.ts
+│   │   └── getTransaction.ts
+│   └── index.ts             # Application entry
+```
 
-### Mining System
-- Automated daily mining rewards (10 coins/day)
-- 24-hour mining cooldown
-- Secure mining validation
-
-### Transaction System
-- Peer-to-peer coin transfers
-- Transaction history tracking
-- Daily transaction limits
-- Secure hash generation
-- Block number assignment
-
-### User Management
-- JWT-based authentication
-- Secure password handling
-- Account recovery system
-
-### Analytics
-- Real-time leaderboard
-- Transaction metrics
-- User statistics
-
-## 🛠 Technical Stack
-
-- **Backend**: Node.js + TypeScript
+## ⚙️ Technologies Used
+- **Runtime**: Node.js
+- **Language**: TypeScript
 - **Framework**: Express.js
 - **Database**: MongoDB
 - **Authentication**: JWT
 - **Security**: bcryptjs
 - **Development**: nodemon
 
-## 📦 Installation
+## 🛠️ Setup & Installation
 
+### Prerequisites
+- Node.js v14 or higher
+- MongoDB instance
+- npm/yarn package manager
+
+### Installation Steps
 ```bash
+# Clone repository
 git clone <repository-url>
-cd crypto-mining-app
+
+# Install dependencies
 npm install
+
+# Build project
+npm run build
 ```
 
-## ⚙️ Configuration
-
+### Environment Configuration
 Create `.env` file:
 ```env
 PORT=4000
-MONGO_URI=your_mongodb_uri
-JWT_SECRET=your_secret
+MONGO_URI=mongodb://your-connection-string
+JWT_SECRET=your-secret-key
 JWT_EXPIRES_IN=7d
 FixMiniingRate=10
 NODE_ENV=development
@@ -58,60 +72,106 @@ NODE_ENV=development
 
 ## 🚀 Running the Application
 
-Development:
+### Development Mode
 ```bash
 npm run dev
 ```
 
-Production:
+### Production Mode
 ```bash
-npm run build
 npm start
 ```
 
-## 📁 Project Structure
-```
-backend/
-├── src/
-│   ├── account/          # Authentication logic
-│   ├── coinTransfer/     # Coin transfer operations
-│   ├── db/              # Database connection
-│   ├── leaderboard/     # Leaderboard functionality
-│   ├── mining-coin/     # Mining operations
-│   ├── models/          # Data models
-│   ├── routers/         # API routes
-│   ├── transactions/    # Transaction handling
-│   └── index.ts         # Entry point
-```
-
-## 🔗 API Endpoints
+## 📌 API Endpoints
 
 ### Authentication
-- `POST /api/signup` - New user registration
-- `POST /api/login` - User authentication
-- `POST /api/password-reset` - Password recovery
+- **POST** `/api/signup`
+  - Register new user
+  - Required: username, email, password
+
+- **POST** `/api/login`
+  - User authentication
+  - Required: email, password
+
+- **POST** `/api/password-reset`
+  - Password recovery
+  - Required: email
 
 ### Mining Operations
-- `POST /api/mine` - Initiate mining
+- **POST** `/api/mine`
+  - Mine new coins
+  - Requires authentication
+  - 24-hour cooldown
 
 ### Transactions
-- `POST /api/send` - Transfer coins
-- `GET /api/transactions` - List transactions
-- `GET /api/transactions/:hash` - Transaction details
-- `GET /api/transactions/user/:address` - User transactions
+- **POST** `/api/send`
+  - Transfer coins
+  - Required: recipient, amount
+
+- **GET** `/api/transactions`
+  - List all transactions
+
+- **GET** `/api/transactions/:hash`
+  - Get transaction details
+
+- **GET** `/api/transactions/user/:address`
+  - Get user transactions
 
 ### Analytics
-- `GET /api/leaderboard` - Top miners ranking
+- **GET** `/api/leaderboard`
+  - View top miners
 
 ## 🔒 Security Features
-- Password hashing
-- JWT authentication
-- Rate limiting
-- Transaction verification
-- Protected routes
+1. Password Encryption
+2. JWT Authentication
+3. Rate Limiting
+4. Protected Routes
+5. Transaction Verification
+
+## 💻 Development Features
+- TypeScript for type safety
+- Hot reloading with nodemon
+- ESLint configuration
+- Error handling middleware
+- MongoDB connection pooling
+
+## 🔍 Testing
+```bash
+# Run tests
+npm test
+
+# Run with coverage
+npm run test:coverage
+```
+
+## 📊 Mining System
+- Daily mining reward: 10 coins
+- Cooldown period: 24 hours
+- Automated distribution
+- Transaction limits: 5 per day
+
+## 🔄 Transaction System
+- Unique hash generation
+- Block number assignment
+- Transaction history
+- Daily limits
+- P2P transfers
+
+## 📈 Monitoring
+- Transaction logging
+- Error tracking
+- User activity monitoring
+- System performance metrics
+
+## 🤝 Contributing
+1. Fork repository
+2. Create feature branch
+3. Commit changes
+4. Push to branch
+5. Open pull request
 
 ## 📝 License
 MIT License
 
-## 🤝 Contributing
-Pull requests welcome. For major changes, open an issue first.
+## 🆘 Support
+For support, email [thecodexaoffical@gmail.com]
