@@ -26,7 +26,7 @@ router.get("/getUsersData",getUsers);
 router.get("/getUserByAddress/:address",getUserDataByAddress);
 
 //coin mining 
-router.post("/mining/coin",userAuth,mineCoin)
+router.post("/mining/coin",mineCoin)
 
 
 // coin transfer

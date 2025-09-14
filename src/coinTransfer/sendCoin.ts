@@ -3,7 +3,7 @@ import { User } from "../models/user.model";
 import { Transaction } from "../models/transaction.hash";
 import crypto from "crypto";
 
-// / Helper: generate guaranteed unique transaction hash
+// generate guaranteed unique transaction hash
 async function generateUniqueTransactionHash(
   from: string,
   to: string,
@@ -95,6 +95,7 @@ export const sendCoin = async (req: Request, res: Response) => {
       to: toAddress,
       amount,
       blockNumber: currentBlockNumber,
+      previousBlock: lastTx ? lastTx.blockNumber : 0,
       transactionHash,
     });
 

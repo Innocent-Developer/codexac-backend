@@ -35,7 +35,7 @@ export const signup = async (req: Request, res: Response) => {
     // Generate random 6-digit UID
     const uid = Math.floor(100000 + Math.random() * 900000);
 
-    // Generate random crypto address (simulating wallet address)
+    // Generate wallet  address
     const address = "0x" + crypto.randomBytes(20).toString("hex");
 
     // Create new user
