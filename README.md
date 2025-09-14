@@ -169,7 +169,17 @@ npm run test:coverage
 3. Commit changes
 4. Push to branch
 5. Open pull request
+## 🧑‍💼 About the Developer
 
+**Abubakkar Sajid** is a Full Stack Web Developer from Lahore, Pakistan, with approximately 2 years of experience.  
+He works with technologies including TypeScript, JavaScript, React.js, Next.js, Node.js, Express.js, MongoDB, PHP, Python, and tools like Git, Docker, Figma, etc.  
+His work spans from portfolio sites and RESTful APIs to e-commerce apps and crypto-mining apps.  
+Contact info:  
+- Email: abubakkarsajid4@gmail.com  
+- Website: https://abubakkar.online
+- Phone: +92 324 185 1476  
+
+---
 ## 📝 License
 MIT License
 
