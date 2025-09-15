@@ -4,6 +4,7 @@ import {connectDB}  from "./db/dbconnect";
 import router from "./routers/router";
 import cron from "node-cron";
 import { applyDailyInterest } from "./stakeCoin/stakeCoins";
+import cors from "cors"; 
 const PORT = Number(process.env.PORT || 4000);
 
 dotenv.config();
@@ -19,6 +20,16 @@ app.use("/api", router);
 app.get("/", (req, res) => {
   res.send(`<h1>🚀 Server running on http://localhost:${PORT} — env=${process.env.NODE_ENV}</h1>`);
 });
+
+app.use(cors());
+
+// Or restrict to specific frontend origins:
+app.use(cors({
+  origin: ["http://localhost:3000", "https://your-frontend-domain.com"],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
+
 
 //stack method every midnight
 cron.schedule("0 0 * * *", async () => {
