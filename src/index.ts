@@ -15,19 +15,17 @@ const app = express();
 
 // Connect Database
 connectDB();
-
-// ✅ Enable CORS
 app.use(cors({
   origin: [
-    "http://localhost:3000",              // local frontend
-    "https://codexac-crypto.vercel.app"  // deployed frontend
+    "http://localhost:3000",
+    "https://codexac-crypto.vercel.app"
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   credentials: true,
 }));
 
-// ✅ Handle preflight requests globally
-app.options("*", cors());
+// ✅ Fix for Express v5: use regex instead of "*"
+app.options(/.*/, cors());
 
 // Middleware
 app.use(express.json());
