@@ -14,6 +14,13 @@ dotenv.config();
 const app = express();
 connectDB();
 
+// ✅ CORS must be before routes
+app.use(cors({
+  origin: ["http://localhost:3000", "https://codexac-crypto.vercel.app/login" ],  // allow React dev frontend
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  credentials: true,
+}));
+
 app.use(express.json());
 app.use("/api", router);
 
@@ -21,22 +28,11 @@ app.get("/", (req, res) => {
   res.send(`<h1>🚀 Server running on http://localhost:${PORT} — env=${process.env.NODE_ENV}</h1>`);
 });
 
-app.use(cors());
-
-// Or restrict to specific frontend origins:
-app.use(cors({
-  origin: ["http://localhost:3000", "https://your-frontend-domain.com"],
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
-}));
-
-
-//stack method every midnight
 cron.schedule("0 0 * * *", async () => {
-  console.log(" Running daily interest job...");
+  console.log("Running daily interest job...");
   await applyDailyInterest();
 });
+
 app.listen(PORT, () => {
-  
   console.log(`Server running on http://localhost:${PORT} — env=${process.env.NODE_ENV}`);
 })
