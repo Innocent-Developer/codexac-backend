@@ -55,7 +55,13 @@ export const sendCoin = async (req: Request, res: Response) => {
 
     if (sender.totalCoins < amount) {
       return res.status(400).json({ message: "Insufficient balance" });
-    }
+    };
+    // check verifactions
+    if(!sender.isVerification){
+      return res.status(403).json({ message: "User is not verified" });
+    };
+
+
 
     // / Enforce 5 transactions per day limit
     const today = new Date();

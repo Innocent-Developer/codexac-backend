@@ -12,6 +12,8 @@ import { sendCoin } from "../coinTransfer/sendCoin";
 import userAuth from "../midelwares/userAuth";
 import { passwordReset } from "../account/passwordReset";
 import { getUserDataByAddress } from "../account/getuserdataByaddress";
+import { applyKyc } from "../kycs/applyKyc";
+import { getKycStatus } from "../kycs/getKycStatus";
 
 const router = Router();
 //auths
@@ -39,5 +41,10 @@ router.post("/stack/coin",createStack);
 router.get("/transactions",getAllTransactions);
 router.get("/transactions/ua/:userAddress",getAllTransactionsByUser);
 router.get("/transactions/txh/:transactionHash",getTransaction);
+
+// kyc
+router.post("/kyc/apply",applyKyc);
+router.get("/kyc/status/:userId",getKycStatus);
+
 
 export default router;
