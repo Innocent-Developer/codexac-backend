@@ -43,7 +43,7 @@ router.get("/transactions/ua/:userAddress",getAllTransactionsByUser);
 router.get("/transactions/txh/:transactionHash",getTransaction);
 
 // kyc
-router.post("/kyc/apply",applyKyc);
+router.post("/kyc-apply",applyKyc);
 router.get("/kyc/status/:userId",getKycStatus);
 
 
