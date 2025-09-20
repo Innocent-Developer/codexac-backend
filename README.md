@@ -1,9 +1,82 @@
-# Crypto Mining Backend Application
+# 🚀 Crypto Mining Backend Application
 
-## 🚀 Project Overview
-A robust cryptocurrency mining and transaction management system built with TypeScript and Node.js.
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Node](https://img.shields.io/badge/node-%3E%3D14.0.0-brightgreen)
+![TypeScript](https://img.shields.io/badge/TypeScript-4.9.5-blue)
 
-## 📁 Directory Structure
+## 📖 Table of Contents
+- [Overview](#-overview)
+- [Features](#-features)
+- [Tech Stack](#%EF%B8%8F-tech-stack)
+- [Project Structure](#-project-structure)
+- [Getting Started](#-getting-started)
+- [API Documentation](#-api-documentation)
+- [Security](#-security)
+- [Deployment](#-deployment)
+- [Contributing](#-contributing)
+- [Support](#-support)
+
+## 🎯 Overview
+A high-performance cryptocurrency mining and transaction management system that provides secure mining operations, real-time transactions, and comprehensive analytics.
+
+## ✨ Features
+
+### Mining System
+- **Automated Mining**
+  - Daily rewards: 10 coins
+  - Smart cooldown system
+  - Anti-spam protection
+  - Mining rate optimization
+
+### Transaction System
+- **Secure Transfers**
+  - P2P transactions
+  - Real-time processing
+  - Transaction verification
+  - Daily limits (5 transactions)
+  - Block generation
+
+### User Management
+- **Advanced Authentication**
+  - JWT-based security
+  - Password encryption
+  - Session management
+  - Account recovery
+  - Email verification
+
+### Analytics Dashboard
+- **Real-time Metrics**
+  - Mining statistics
+  - Transaction history
+  - User rankings
+  - Performance analytics
+
+## 🛠️ Tech Stack
+
+### Core
+- **Runtime**: Node.js (v14+)
+- **Language**: TypeScript 4.9.5
+- **Framework**: Express.js 4.18.2
+
+### Database & Storage
+- **Primary DB**: MongoDB 5.0+
+- **Cache**: Redis (optional)
+- **File Storage**: AWS S3 (optional)
+
+### Security
+- **Authentication**: JWT
+- **Encryption**: bcryptjs
+- **API Security**: Helmet.js
+- **Rate Limiting**: Express-rate-limit
+
+### Development
+- **Testing**: Jest
+- **Linting**: ESLint
+- **Code Style**: Prettier
+- **Documentation**: Swagger/OpenAPI
+
+## 📁 Project Structure
 ```
 backend/
 ├── src/
@@ -31,156 +104,137 @@ backend/
 │   └── index.ts             # Application entry
 ```
 
-## ⚙️ Technologies Used
-- **Runtime**: Node.js
-- **Language**: TypeScript
-- **Framework**: Express.js
-- **Database**: MongoDB
-- **Authentication**: JWT
-- **Security**: bcryptjs
-- **Development**: nodemon
-
-## 🛠️ Setup & Installation
+## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js v14 or higher
-- MongoDB instance
-- npm/yarn package manager
+```bash
+node -v  # Should be ≥ 14.0.0
+npm -v   # Should be ≥ 6.0.0
+```
 
-### Installation Steps
+### Installation
 ```bash
 # Clone repository
-git clone <repository-url>
+git clone https://github.com/yourusername/crypto-mining-backend.git
 
 # Install dependencies
 npm install
 
+# Setup environment
+cp .env.example .env
+
 # Build project
 npm run build
-```
 
-### Environment Configuration
-Create `.env` file:
-```env
-PORT=4000
-MONGO_URI=mongodb://your-connection-string
-JWT_SECRET=your-secret-key
-JWT_EXPIRES_IN=7d
-FixMiniingRate=10
-NODE_ENV=development
-```
-
-## 🚀 Running the Application
-
-### Development Mode
-```bash
+# Start development server
 npm run dev
 ```
 
-### Production Mode
+### Environment Variables
+```env
+# Server Configuration
+PORT=4000
+NODE_ENV=development
+
+# Database
+MONGO_URI=mongodb://localhost:27017/crypto-mining
+REDIS_URL=redis://localhost:6379
+
+# Authentication
+JWT_SECRET=your-super-secret-key
+JWT_EXPIRES_IN=7d
+
+# Mining Configuration
+FIX_MINING_RATE=10
+MINING_COOLDOWN=86400
+
+# Email (Optional)
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_USER=your-email
+SMTP_PASS=your-password
+```
+
+## 📚 API Documentation
+
+### Authentication Endpoints
+```typescript
+POST /api/v1/auth/signup
+POST /api/v1/auth/login
+POST /api/v1/auth/refresh-token
+POST /api/v1/auth/reset-password
+```
+
+### Mining Endpoints
+```typescript
+POST /api/v1/mining/start
+GET /api/v1/mining/status
+GET /api/v1/mining/history
+```
+
+### Transaction Endpoints
+```typescript
+POST /api/v1/transactions/send
+GET /api/v1/transactions/history
+GET /api/v1/transactions/:hash
+GET /api/v1/transactions/stats
+```
+
+## 🔒 Security
+
+### Implementation
+- JWT token rotation
+- Rate limiting per IP
+- Request validation
+- SQL injection prevention
+- XSS protection
+- CORS configuration
+
+### Best Practices
+- Environment variable validation
+- Secure password storage
+- Input sanitization
+- Error handling
+- Audit logging
+
+## 🚀 Deployment
+
+### Production Setup
 ```bash
+# Build for production
+npm run build
+
+# Start production server
 npm start
+
+# With PM2
+pm2 start ecosystem.config.js
 ```
 
-## 📌 API Endpoints
-
-### Authentication
-- **POST** `/api/signup`
-  - Register new user
-  - Required: username, email, password
-
-- **POST** `/api/login`
-  - User authentication
-  - Required: email, password
-
-- **POST** `/api/password-reset`
-  - Password recovery
-  - Required: email
-
-### Mining Operations
-- **POST** `/api/mine`
-  - Mine new coins
-  - Requires authentication
-  - 24-hour cooldown
-
-### Transactions
-- **POST** `/api/send`
-  - Transfer coins
-  - Required: recipient, amount
-
-- **GET** `/api/transactions`
-  - List all transactions
-
-- **GET** `/api/transactions/:hash`
-  - Get transaction details
-
-- **GET** `/api/transactions/user/:address`
-  - Get user transactions
-
-### Analytics
-- **GET** `/api/leaderboard`
-  - View top miners
-
-## 🔒 Security Features
-1. Password Encryption
-2. JWT Authentication
-3. Rate Limiting
-4. Protected Routes
-5. Transaction Verification
-
-## 💻 Development Features
-- TypeScript for type safety
-- Hot reloading with nodemon
-- ESLint configuration
-- Error handling middleware
-- MongoDB connection pooling
-
-## 🔍 Testing
+### Docker Support
 ```bash
-# Run tests
-npm test
+# Build image
+docker build -t crypto-mining-backend .
 
-# Run with coverage
-npm run test:coverage
+# Run container
+docker run -p 4000:4000 crypto-mining-backend
 ```
-
-## 📊 Mining System
-- Daily mining reward: 10 coins
-- Cooldown period: 24 hours
-- Automated distribution
-- Transaction limits: 5 per day
-
-## 🔄 Transaction System
-- Unique hash generation
-- Block number assignment
-- Transaction history
-- Daily limits
-- P2P transfers
-
-## 📈 Monitoring
-- Transaction logging
-- Error tracking
-- User activity monitoring
-- System performance metrics
 
 ## 🤝 Contributing
-1. Fork repository
-2. Create feature branch
-3. Commit changes
-4. Push to branch
-5. Open pull request
-## 🧑‍💼 About the Developer
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
 
-**Abubakkar Sajid** is a Full Stack Web Developer from Lahore, Pakistan, with approximately 2 years of experience.  
-He works with technologies including TypeScript, JavaScript, React.js, Next.js, Node.js, Express.js, MongoDB, PHP, Python, and tools like Git, Docker, Figma, etc.  
-Contact info:  
-- Email: abubakkarsajid4@gmail.com  
-- Website: https://abubakkar.online
-- Phone: +92 324 185 1476  
+## 👨‍💻 Developer
 
----
+**Abubakkar Sajid**
+- Portfolio: [https://abubakkar.online](https://abubakkar.online)
+- Email: abubakkarsajid4@gmail.com
+- LinkedIn: [Profile](https://linkedin.com/in/yourusername)
+- Phone: +92 324 185 1476
+
+## 📫 Support
+- Technical Support: thecodexaoffical@gmail.com
+- Bug Reports: [Issue Tracker](https://github.com/yourusername/crypto-mining-backend/issues)
+- Documentation: [Wiki](https://github.com/yourusername/crypto-mining-backend/wiki)
+
 ## 📝 License
-MIT License
-
-## 🆘 Support
-For support, email [thecodexaoffical@gmail.com]
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
