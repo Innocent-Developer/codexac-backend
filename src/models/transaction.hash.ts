@@ -7,6 +7,7 @@ export interface ITransaction extends Document {
   blockNumber: number;
   previousBlock:number;
   transactionHash?: string;
+  fee: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -18,6 +19,7 @@ const TransactionSchema: Schema = new Schema(
     amount: { type: Number, required: true },
     previousBlock:{type:Number,required:true},
     blockNumber: { type: Number },
+    fee: { type: Number,  },
     transactionHash: { type: String, unique: true, sparse: true },
   },
   {

@@ -21,49 +21,62 @@ async function generateUniqueTransactionHash(
       .digest("hex");
 
     const found = await Transaction.exists({ transactionHash: hash });
-    exists = !!found; //  ensures it's boolean
+    exists = !!found; // ensures it's boolean
   } while (exists);
 
   return hash;
 }
 
-
 export const sendCoin = async (req: Request, res: Response) => {
+  const session = await User.startSession();
+  session.startTransaction();
+
   try {
     const { fromAddress, toAddress, amount } = req.body;
 
     if (!fromAddress || !toAddress || !amount || amount <= 0) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({ message: "Invalid input data" });
     }
 
     if (fromAddress === toAddress) {
+      await session.abortTransaction();
+      session.endSession();
       return res
         .status(400)
         .json({ message: "Cannot send coins to the same address" });
     }
 
-    const sender = await User.findOne({ address: fromAddress });
-    const receiver = await User.findOne({ address: toAddress });
+    const sender = await User.findOne({ address: fromAddress }).session(session);
+    const receiver = await User.findOne({ address: toAddress }).session(session);
 
     if (!sender) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(404).json({ message: "Sender address not found" });
     }
 
     if (!receiver) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(404).json({ message: "Receiver address not found" });
     }
 
     if (sender.totalCoins < amount) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({ message: "Insufficient balance" });
-    };
-    // check verifactions
-    if(!sender.isVerification){
+    }
+
+    // check verification
+    if (!sender.isVerification) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(403).json({ message: "User is not verified" });
-    };
+    }
 
-
-
-    // / Enforce 5 transactions per day limit
+    // enforce 5 transactions per day limit
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -73,45 +86,65 @@ export const sendCoin = async (req: Request, res: Response) => {
     });
 
     if (txCountToday >= 5) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(403).json({
         message: "Daily transaction limit reached (5 per day)",
       });
     }
 
-    // / Get next block number
+    // get next block number
     const lastTx = await Transaction.findOne().sort({ blockNumber: -1 });
     const currentBlockNumber = lastTx ? lastTx.blockNumber + 1 : 1;
 
-    // / Perform transfer
-    sender.totalCoins -= amount;
-    receiver.totalCoins += amount;
-    await sender.save();
-    await receiver.save();
+    // transaction fee 0.01%
+    const fee = amount * 0.0001; // 0.01%
+    
+    const totalDeduction = amount + fee;
+    if (sender.totalCoins < totalDeduction) {
+      await session.abortTransaction();
+      session.endSession();
+      return res
+        .status(400)
+        .json({ message: "Insufficient balance to cover amount and fee" });
+    }
 
-    // / Generate unique hash
+    // perform transfer
+    sender.totalCoins -= totalDeduction;
+    receiver.totalCoins += amount;
+    await sender.save({ session });
+    await receiver.save({ session });
+
+    // generate unique hash
     const transactionHash = await generateUniqueTransactionHash(
       fromAddress,
       toAddress,
-      amount
+      totalDeduction
     );
 
-    // / Save transaction
+    // save transaction
     const newTransaction = new Transaction({
       from: fromAddress,
       to: toAddress,
       amount,
+      fee,
       blockNumber: currentBlockNumber,
       previousBlock: lastTx ? lastTx.blockNumber : 0,
       transactionHash,
     });
 
-    await newTransaction.save();
+    await newTransaction.save({ session });
+
+    await session.commitTransaction();
+    session.endSession();
 
     return res.status(200).json({
       message: "Transaction successful",
       transaction: newTransaction,
     });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     console.error("Error during coin transfer:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
