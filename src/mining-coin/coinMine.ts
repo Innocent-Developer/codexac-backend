@@ -4,7 +4,7 @@ import StoreIp from "../models/storeIp.model";
 import { Transaction } from "../models/transaction.hash";
 import crypto from "crypto";
 
-// generate guaranteed unique transaction hash
+// Generate guaranteed unique transaction hash
 async function generateUniqueTransactionHash(
   from: string,
   to: string,
@@ -27,9 +27,9 @@ async function generateUniqueTransactionHash(
   return hash;
 }
 
-// 24 hours cooldown in milliseconds
+// 24 hours cooldown
 const MINING_COOLDOWN = 24 * 60 * 60 * 1000;
-const REWARD = Number(process.env.FixMiniingRate) || 2; // fixed reward from env, fallback 2
+const REWARD = Number(process.env.FixMiniingRate) || 2; // fallback = 2 coins
 
 export const mineCoin = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -48,10 +48,9 @@ export const mineCoin = async (req: Request, res: Response): Promise<void> => {
 
     const now = new Date();
 
-    // check cooldown
+    // Check cooldown
     if (user.lastMiningTime) {
       const timeSinceLastMining = now.getTime() - user.lastMiningTime.getTime();
-
       if (timeSinceLastMining < MINING_COOLDOWN) {
         const remainingHours = Math.ceil(
           (MINING_COOLDOWN - timeSinceLastMining) / (1000 * 60 * 60)
@@ -66,23 +65,23 @@ export const mineCoin = async (req: Request, res: Response): Promise<void> => {
       }
     }
 
-    // update user coins & mining info
+    // Update user balance + mining info
     user.totalCoins += REWARD;
     user.lastMiningTime = now;
     user.lastIpAddress = req.ip || ipaddress || "unknown";
 
-    // get next block number
+    // Get next block number
     const lastTx = await Transaction.findOne().sort({ blockNumber: -1 });
     const currentBlockNumber = lastTx ? lastTx.blockNumber + 1 : 1;
 
-    // generate transaction hash
+    // Generate unique hash
     const transactionHash = await generateUniqueTransactionHash(
       "SYSTEM",
       user.address,
       REWARD
     );
 
-    // create mining transaction (no fee)
+    // Create transaction record
     const transaction = new Transaction({
       from: "SYSTEM",
       to: user.uid.toString(),
@@ -90,14 +89,14 @@ export const mineCoin = async (req: Request, res: Response): Promise<void> => {
       blockNumber: currentBlockNumber,
       previousBlock: lastTx ? lastTx.blockNumber : 0,
       transactionHash,
-      fee: 0,
+      fee: 0, // mining reward has no fee
       timestamp: now,
     });
 
     await transaction.save();
     await user.save();
 
-    // log IP history
+    // Log IP history
     await StoreIp.create({
       storeId: user.uid.toString(),
       ip: user.lastIpAddress,
