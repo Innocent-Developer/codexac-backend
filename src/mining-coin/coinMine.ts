@@ -1,6 +1,29 @@
 import { Request, Response } from "express";
 import { User } from "../models/user.model";
 import StoreIp from "../models/storeIp.model";
+import { Transaction } from "../models/transaction.hash";
+import crypto from "crypto";
+
+async function generateUniqueTransactionHash(
+  from: string,
+  to: string,
+  amount: number
+): Promise<string> {
+  let hash: string;
+  let exists = true;
+  do {
+    hash = crypto
+      .createHash("sha256")
+      .update(
+        `${from}-${to}-${amount}-${Date.now()}-${Math.random()}-${crypto.randomUUID()}`
+      )
+      .digest("hex");
+    const found = await Transaction.exists({ transactionHash: hash });
+    exists = !!found; //  ensures it's boolean
+  }
+  while (exists);
+  return hash;
+}
 
 // 24 hours cooldown in milliseconds
 const MINING_COOLDOWN = 24 * 60 * 60 * 1000;
@@ -42,6 +65,23 @@ export const mineCoin = async (req: Request, res: Response): Promise<void> => {
     user.totalCoins += REWARD;
     user.lastMiningTime = now;
     user.lastIpAddress = req.ip || ipaddress || "unknown";
+
+    // Create a transaction record for mining reward
+    const transactionHash = await generateUniqueTransactionHash(
+      "SYSTEM",
+      user.address,
+      REWARD
+    );
+    const transaction = new Transaction({
+      from: "SYSTEM",
+      to: user.uid.toString(),
+      amount: REWARD,
+      transactionHash,
+      timestamp: now,
+      type: "mining",
+    });
+    
+    await transaction.save();
 
     await user.save();
 
