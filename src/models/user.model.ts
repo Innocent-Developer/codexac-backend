@@ -8,6 +8,8 @@ export interface IUser extends Document {
   address: string;
   totalCoins: number;
   ranks: number;
+  inviteCode:number;
+  referralCode:number;
   lastMiningTime?: Date;
   createdAt: Date;
   lastIpAddress?: string;
@@ -26,6 +28,8 @@ const UserSchema: Schema = new Schema({
   lastMiningTime: { type: Date },
   createdAt: { type: Date, default: Date.now },
   lastIpAddress: { type: String, default: null },
+  inviteCode: { type: Number, unique: true },
+  referralCode: { type: Number, default: null },
   lastTransactionDate: { type: Date, default: null }, // Initialize to epoch start
   isVerification: { type: Boolean, default: false },
 });
