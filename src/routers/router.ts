@@ -9,7 +9,6 @@ import { getAllTransactions } from "../transactions/getAlltransaction";
 import { getAllTransactionsByUser } from "../transactions/getAllTransactionByUser";
 import { getTransaction } from "../transactions/getTransaction";
 import { sendCoin } from "../coinTransfer/sendCoin";
-import userAuth from "../midelwares/userAuth";
 import { passwordReset } from "../account/passwordReset";
 import { getUserDataByAddress } from "../account/getuserdataByaddress";
 import { applyKyc } from "../kycs/applyKyc";
