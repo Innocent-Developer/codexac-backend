@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
+import mongoose from "mongoose";
 import { User } from "../models/user.model";
 import StoreIp from "../models/storeIp.model";
 import { Transaction } from "../models/transaction.hash";
 import crypto from "crypto";
 
-// Generate guaranteed unique transaction hash
 async function generateUniqueTransactionHash(
   from: string,
   to: string,
@@ -27,11 +27,14 @@ async function generateUniqueTransactionHash(
   return hash;
 }
 
-// 24 hours cooldown
+// Cooldown: 24 hours
 const MINING_COOLDOWN = 24 * 60 * 60 * 1000;
-const REWARD = Number(process.env.FixMiniingRate) || 2; // fallback = 2 coins
+const REWARD = Number(process.env.FixMiniingRate) || 2;
 
 export const mineCoin = async (req: Request, res: Response): Promise<void> => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const { userId, ipaddress } = req.body;
 
@@ -40,7 +43,7 @@ export const mineCoin = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).session(session);
     if (!user) {
       res.status(404).json({ message: "User not found" });
       return;
@@ -48,7 +51,7 @@ export const mineCoin = async (req: Request, res: Response): Promise<void> => {
 
     const now = new Date();
 
-    // Check cooldown
+    // check mining cooldown
     if (user.lastMiningTime) {
       const timeSinceLastMining = now.getTime() - user.lastMiningTime.getTime();
       if (timeSinceLastMining < MINING_COOLDOWN) {
@@ -65,42 +68,81 @@ export const mineCoin = async (req: Request, res: Response): Promise<void> => {
       }
     }
 
-    // Update user balance + mining info
+    // determine block number
+    const lastTx = await Transaction.findOne()
+      .sort({ blockNumber: -1 })
+      .session(session);
+
+    const previousBlock = lastTx ? lastTx.blockNumber : 0;
+    const blockNumber = previousBlock + 1;
+
+    // update user
     user.totalCoins += REWARD;
     user.lastMiningTime = now;
     user.lastIpAddress = req.ip || ipaddress || "unknown";
 
-    // Get next block number
-    const lastTx = await Transaction.findOne().sort({ blockNumber: -1 });
-    const currentBlockNumber = lastTx ? lastTx.blockNumber + 1 : 1;
-
-    // Generate unique hash
+    // generate transaction hash
     const transactionHash = await generateUniqueTransactionHash(
       "SYSTEM",
-      user.address,
+      user.uid.toString(),
       REWARD
     );
 
-    // Create transaction record
+    // create transaction record
     const transaction = new Transaction({
       from: "SYSTEM",
       to: user.uid.toString(),
       amount: REWARD,
-      blockNumber: currentBlockNumber,
-      previousBlock: lastTx ? lastTx.blockNumber : 0,
       transactionHash,
-      fee: 0, // mining reward has no fee
+      blockNumber,
+      previousBlock,
       timestamp: now,
+      fee: 0,
     });
 
-    await transaction.save();
-    await user.save();
+    try {
+      console.log("📌 Saving transaction:", transaction);
+      await transaction.save({ session });
+      console.log("✅ Transaction saved successfully");
+    } catch (err: any) {
+      console.error("❌ Transaction save failed:", {
+        message: err.message,
+        name: err.name,
+        code: err.code,
+        stack: err.stack,
+        errors: err.errors,
+      });
+      throw err;
+    }
 
-    // Log IP history
-    await StoreIp.create({
-      storeId: user.uid.toString(),
-      ip: user.lastIpAddress,
-    });
+    // save user
+    await user.save({ session });
+
+    // log ip history
+    try {
+      await StoreIp.create(
+        [
+          {
+            storeId: user.uid.toString(),
+            ip: user.lastIpAddress,
+          },
+        ],
+        { session }
+      );
+      console.log("✅ StoreIp saved successfully");
+    } catch (err: any) {
+      console.error("❌ StoreIp save failed:", {
+        message: err.message,
+        name: err.name,
+        code: err.code,
+        stack: err.stack,
+        errors: err.errors,
+      });
+      throw err;
+    }
+
+    // commit transaction
+    await session.commitTransaction();
 
     res.status(200).json({
       message: "Mining successful",
@@ -108,11 +150,13 @@ export const mineCoin = async (req: Request, res: Response): Promise<void> => {
       totalCoins: user.totalCoins,
       lastMiningTime: user.lastMiningTime,
       lastIpAddress: user.lastIpAddress,
-      transaction,
       nextMiningAvailableAt: new Date(now.getTime() + MINING_COOLDOWN),
     });
   } catch (error) {
-    console.error("Error in mining:", error);
+    console.error("❌ Error in mining:", error);
+    await session.abortTransaction();
     res.status(500).json({ message: "Internal server error" });
+  } finally {
+    session.endSession();
   }
 };
