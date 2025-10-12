@@ -13,6 +13,7 @@ import { passwordReset } from "../account/passwordReset";
 import { getUserDataByAddress } from "../account/getuserdataByaddress";
 import { applyKyc } from "../kycs/applyKyc";
 import { getKycStatus } from "../kycs/getKycStatus";
+import {autoUpdateRanks, getUserRankInfo} from "../levels/updateLevels";
 
 const router = Router();
 //auths
@@ -44,6 +45,14 @@ router.get("/transactions/txh/:transactionHash",getTransaction);
 // kyc
 router.post("/kyc-apply",applyKyc);
 router.get("/kyc/status/:userId",getKycStatus);
+
+// autoUpdateUserRanks
+router.get("/autoUpdateUserRanks",getUserRankInfo);
+
+// autoUpdateRanks()
+
+// function call every  1 minit 
+setInterval(autoUpdateRanks, 60000);
 
 
 export default router;
