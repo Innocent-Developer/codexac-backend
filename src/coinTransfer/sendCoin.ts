@@ -60,8 +60,9 @@ export const sendCoin = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Sender address not found" });
     }
 
-    // ✅ Try to find original receiver
-    let receiver = await User.findOne({ address: toAddress }).session(session);
+    // ✅ Try to find original receiver or user uid
+    let receiver = await (User.findOne({ address: toAddress }).session(session)|| User.findOne({ uid: toAddress }).session(session)); 
+  
 
     let redirected = false;
     let deliveredTo = toAddress;
