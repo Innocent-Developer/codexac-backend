@@ -27,8 +27,6 @@ async function generateUniqueTransactionHash(
   return hash;
 }
 
-// ✅ No schema change required
-
 // fallback address to use when requested receiver doesn't exist
 const FALLBACK_ADDRESS = "0xe33fb56a5e4b37d51dd7307e0133c1a6586a41a8";
 
@@ -60,15 +58,28 @@ export const sendCoin = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Sender address not found" });
     }
 
-    // ✅ Try to find original receiver or user uid
-    let receiver = await (User.findOne({ address: toAddress }).session(session)|| User.findOne({ uid: toAddress }).session(session)); 
-  
-
+    // Determine whether toAddress is a numeric uid or an address.
+    // User uids are numbers (e.g. "12345" or 12345).
+    let receiver = null;
     let redirected = false;
-    let deliveredTo = toAddress;
+    let deliveredTo = String(toAddress); // by default, reflect original requested toAddress
+
+    // Normalize toAddress to string for checking
+    const toAddrStr = String(toAddress).trim();
+
+    // Check if toAddress is a numeric uid (only digits). If so, look up by uid (number).
+    const isUid = /^\d+$/.test(toAddrStr);
+
+    if (isUid) {
+      const uidNum = parseInt(toAddrStr, 10);
+      receiver = await User.findOne({ uid: uidNum }).session(session);
+    } else {
+      // Not uid → treat as address string
+      receiver = await User.findOne({ address: toAddrStr }).session(session);
+    }
 
     if (!receiver) {
-      // ✅ Receiver missing → use fallback
+      // Receiver not found → fallback to the configured fallback address user
       const fallback = await User.findOne({ address: FALLBACK_ADDRESS }).session(session);
       if (!fallback) {
         await session.abortTransaction();
@@ -80,9 +91,13 @@ export const sendCoin = async (req: Request, res: Response) => {
       receiver = fallback;
       redirected = true;
       deliveredTo = FALLBACK_ADDRESS;
+    } else {
+      // If receiver found by uid, set deliveredTo to their actual on-chain address
+      // If found by address, deliveredTo should be that address (ensure consistent)
+      deliveredTo = receiver.address || deliveredTo;
     }
 
-    // ✅ Fee and balance check
+    // Fee and balance check
     const fee = amount * 0.0001;
     const totalDeduction = amount + fee;
 
@@ -104,7 +119,7 @@ export const sendCoin = async (req: Request, res: Response) => {
     const txCountToday = await Transaction.countDocuments({
       from: fromAddress,
       createdAt: { $gte: today },
-    });
+    }).session(session);
 
     if (txCountToday >= 5) {
       await session.abortTransaction();
@@ -117,7 +132,7 @@ export const sendCoin = async (req: Request, res: Response) => {
     const lastTx = await Transaction.findOne().sort({ blockNumber: -1 }).session(session);
     const currentBlockNumber = lastTx ? lastTx.blockNumber + 1 : 1;
 
-    // ✅ Transfer (to fallback if redirected)
+    // Perform transfer (sender -> receiver)
     sender.totalCoins -= totalDeduction;
     receiver.totalCoins += amount;
     await sender.save({ session });
@@ -125,13 +140,13 @@ export const sendCoin = async (req: Request, res: Response) => {
 
     const transactionHash = await generateUniqueTransactionHash(
       fromAddress,
-      toAddress,
+      String(toAddress), // keep original requested value in hash for traceability
       totalDeduction
     );
 
     const newTransaction = new Transaction({
       from: fromAddress,
-      to: toAddress, // ✅ Always log original requested address
+      to: String(toAddress), // always log the original requested address/uid string
       amount,
       fee,
       blockNumber: currentBlockNumber,
@@ -146,8 +161,8 @@ export const sendCoin = async (req: Request, res: Response) => {
     return res.status(200).json({
       message: "Transaction successful",
       transaction: newTransaction,
-      redirected,    // ✅ Returned only in response (NOT saved in DB)
-      deliveredTo,   // ✅ Returned only in response (NOT saved in DB)
+      redirected,    // returned only in response (NOT saved in DB)
+      deliveredTo,   // actual address coins were credited to (NOT saved in DB)
     });
   } catch (error) {
     await session.abortTransaction();

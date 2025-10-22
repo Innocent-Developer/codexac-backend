@@ -1,6 +1,6 @@
-import {login} from "../account/login";
-import {Router} from "express"; 
-import {signup} from "../account/signup";
+import { login } from "../account/login";
+import { Router } from "express";
+import { signup } from "../account/signup";
 import { mineCoin } from "../mining-coin/coinMine";
 import { getUserByUid } from "../account/getUserbuUid";
 import { createStack } from "../stakeCoin/stakeCoins";
@@ -13,46 +13,49 @@ import { passwordReset } from "../account/passwordReset";
 import { getUserDataByAddress } from "../account/getuserdataByaddress";
 import { applyKyc } from "../kycs/applyKyc";
 import { getKycStatus } from "../kycs/getKycStatus";
-import {autoUpdateRanks, getUserRankInfo} from "../levels/updateLevels";
+import { autoUpdateRanks, getUserRankInfo } from "../levels/updateLevels";
+import userAuth from "../midelwares/userAuth";
 
 const router = Router();
 //auths
 router.post("/login", login);
 router.post("/signup", signup);
 
-// password change 
+// password change
 router.post("/user/password/change", passwordReset);
 // getUserByUid
 router.get("/getUserByUid/:uid", getUserByUid);
-router.get("/getUsersData",getUsers);
-router.get("/getUserByAddress/:address",getUserDataByAddress);
+router.get("/getUsersData", getUsers);
+router.get("/getUserByAddress/:address", getUserDataByAddress);
 
-//coin mining 
-router.post("/mining/coin",mineCoin)
 
+// get user by auth token
+router.get("/users/all", userAuth, getUsers);
+
+//coin mining
+router.post("/mining/coin", mineCoin);
 
 // coin transfer
-router.post("/transfer/coin",sendCoin);
+router.post("/transfer/coin", sendCoin);
 
-//stack coin 
-router.post("/stack/coin",createStack);
+//stack coin
+router.post("/stack/coin", createStack);
 
 //transacrions
-router.get("/transactions",getAllTransactions);
-router.get("/transactions/ua/:userAddress",getAllTransactionsByUser);
-router.get("/transactions/txh/:transactionHash",getTransaction);
+router.get("/transactions", getAllTransactions);
+router.get("/transactions/ua/:userAddress", getAllTransactionsByUser);
+router.get("/transactions/txh/:transactionHash", getTransaction);
 
 // kyc
-router.post("/kyc-apply",applyKyc);
-router.get("/kyc/status/:userId",getKycStatus);
+router.post("/kyc-apply", applyKyc);
+router.get("/kyc/status/:userId", getKycStatus);
 
 // autoUpdateUserRanks
-router.get("/autoUpdateUserRanks",getUserRankInfo);
+router.get("/autoUpdateUserRanks", getUserRankInfo);
 
 // autoUpdateRanks()
 
-// function call every  1 minit 
+// function call every  1 minit
 setInterval(autoUpdateRanks, 60000);
-
 
 export default router;
