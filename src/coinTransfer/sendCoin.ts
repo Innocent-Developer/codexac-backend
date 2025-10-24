@@ -42,6 +42,7 @@ export const sendCoin = async (req: Request, res: Response) => {
       toAddress?: string | number;
       amount?: number | string;
     };
+      // get user address if reciver have uid 
 
     const fromAddress = String(body.fromAddress || "").trim();
     const rawToAddress = body.toAddress;
