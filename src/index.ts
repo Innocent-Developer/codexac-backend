@@ -107,9 +107,9 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
     // OPTIONAL: save to DB (guarded)
     try {
-      if (AccessLog && typeof (AccessLog as any).create === "function") {
-        await (AccessLog as any).create(logEntry as any);
-      }
+      // if (AccessLog && typeof (AccessLog as any).create === "function") {
+      //   await (AccessLog as any).create(logEntry as any);
+      // }
     } catch (err) {
       console.error("Failed to save access log:", err);
     }
