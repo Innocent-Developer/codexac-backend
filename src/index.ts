@@ -30,7 +30,7 @@ app.use(
 app.set("trust proxy", true);
 app.use(requestIp.mw());
 app.use(express.json());
-
+app.set('trust proxy', 1)
 /**
  * Safely extract a single client IP string from multiple possible sources.
  * Guarantees a string (never undefined) and normalizes ::ffff: IPv4-mapped addresses.
