@@ -44,11 +44,14 @@ function getClientIp(req: Request): string {
   const clientIpFromReq: unknown =
     // Cloudflare header (if behind CF)
     req.headers["cf-connecting-ip"] ??
-    // set by request-ip middleware
-    (req as any).clientIp ??
-    // Common proxy headers
+    // Common proxy headers (note: often a CSV for x-forwarded-for)
     req.headers["x-forwarded-for"] ??
     req.headers["x-real-ip"] ??
+    // Express-computed IPs (honors trust proxy)
+    (Array.isArray((req as any).ips) && (req as any).ips.length > 0 ? (req as any).ips[0] : undefined) ??
+    (req as any).ip ??
+    // request-ip middleware (fallback)
+    (req as any).clientIp ??
     // Fallback to socket
     req.socket?.remoteAddress ??
     "Unknown";
