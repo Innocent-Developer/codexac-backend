@@ -1,7 +1,6 @@
 // src/index.ts
 import express, { Request, Response, NextFunction } from "express";
 import dotenv from "dotenv";
-import os from "os";
 import requestIp from "request-ip";
 import cors from "cors";
 import cron from "node-cron";
@@ -30,7 +29,7 @@ app.use(
 app.set("trust proxy", true);
 app.use(requestIp.mw());
 app.use(express.json());
-app.set('trust proxy', 1)
+
 /**
  * Safely extract a single client IP string from multiple possible sources.
  * Guarantees a string (never undefined) and normalizes ::ffff: IPv4-mapped addresses.
@@ -139,10 +138,6 @@ app.get("/network-info", async (req: Request, res: Response) => {
     ip,
     approximateLatencyMs: latency,
     speedEstimate,
-    server: {
-      host: os.hostname(),
-      platform: os.platform(),
-    },
   };
 
   return res.json(payload);
